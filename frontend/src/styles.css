@@ -1,0 +1,189 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	--bg: #020617;
+	--text: #f1f5f9;
+	--link: #f1f5f9;
+	--muted: #94a3b8;
+	--border: rgba(30, 41, 59, 0.6);
+	--surface: rgba(15, 23, 42, 0.3);
+	--surface-strong: rgba(2, 6, 23, 0.4);
+	--surface-hover: rgba(15, 23, 42, 0.4);
+	--badge-bg: rgba(2, 6, 23, 0.3);
+	--badge-text: #e2e8f0;
+	--input-bg: rgba(2, 6, 23, 0.4);
+	--input-border: rgba(30, 41, 59, 0.7);
+	--placeholder: #64748b;
+	--topbar-bg: rgba(2, 6, 23, 0.6);
+	--error-border: rgba(244, 63, 94, 0.3);
+	--error-bg: rgba(244, 63, 94, 0.1);
+	--error-text: #fecdd3;
+}
+
+:root[data-theme='light'] {
+	--bg: #f8fafc;
+	--text: #0f172a;
+	--link: #0f172a;
+	--muted: #475569;
+	--border: rgba(15, 23, 42, 0.12);
+	--surface: rgba(255, 255, 255, 0.8);
+	--surface-strong: rgba(255, 255, 255, 0.9);
+	--surface-hover: rgba(15, 23, 42, 0.06);
+	--badge-bg: rgba(15, 23, 42, 0.06);
+	--badge-text: #0f172a;
+	--input-bg: rgba(255, 255, 255, 0.9);
+	--input-border: rgba(15, 23, 42, 0.14);
+	--placeholder: #64748b;
+	--topbar-bg: rgba(248, 250, 252, 0.8);
+	--error-border: rgba(244, 63, 94, 0.25);
+	--error-bg: rgba(244, 63, 94, 0.08);
+	--error-text: #9f1239;
+}
+
+@layer base {
+	html,
+	body {
+		@apply h-full;
+	}
+
+	body {
+		@apply antialiased;
+		background-color: var(--bg);
+		color: var(--text);
+	}
+
+	a {
+		color: var(--link);
+	}
+}
+
+@layer components {
+	.unitify-splash-logo {
+		animation: unitify-splash-pop 800ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+	}
+
+	@keyframes unitify-splash-pop {
+		0% {
+			transform: translateY(8px) scale(0.7);
+			opacity: 0.75;
+		}
+		60% {
+			transform: translateY(-2px) scale(1.08);
+			opacity: 1;
+		}
+		100% {
+			transform: translateY(0) scale(1);
+		}
+	}
+
+	.app-shell {
+		@apply min-h-screen;
+	}
+
+	.app-container {
+		@apply mx-auto w-full max-w-6xl px-4;
+	}
+
+	.card {
+		@apply rounded-2xl border;
+		border-color: var(--border);
+		background-color: var(--surface);
+	}
+
+	.card-pad {
+		@apply p-5 sm:p-6;
+	}
+
+	.card-title {
+		@apply text-base font-semibold tracking-tight;
+	}
+
+	.muted {
+		@apply text-sm;
+		color: var(--muted);
+	}
+
+	.divider {
+		@apply border-t;
+		border-color: var(--border);
+	}
+
+	.input {
+		@apply w-full rounded-xl border px-3 py-2 text-sm;
+		border-color: var(--input-border);
+		background-color: var(--input-bg);
+		color: var(--text);
+		::placeholder {
+			color: var(--placeholder);
+		}
+		@apply focus:outline-none focus:ring-2 focus:ring-indigo-500/30;
+	}
+
+	.select {
+		@apply w-full rounded-xl border px-3 py-2 text-sm;
+		border-color: var(--input-border);
+		background-color: var(--input-bg);
+		color: var(--text);
+		@apply focus:outline-none focus:ring-2 focus:ring-indigo-500/30;
+	}
+
+	.textarea {
+		@apply w-full rounded-xl border px-3 py-2 text-sm;
+		border-color: var(--input-border);
+		background-color: var(--input-bg);
+		color: var(--text);
+		::placeholder {
+			color: var(--placeholder);
+		}
+		@apply focus:outline-none focus:ring-2 focus:ring-indigo-500/30;
+	}
+
+	.btn {
+		@apply inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium;
+		@apply focus:outline-none focus:ring-2 focus:ring-indigo-500/30;
+		@apply disabled:cursor-not-allowed disabled:opacity-60;
+	}
+
+	.btn-primary {
+		@apply bg-indigo-500 text-white hover:bg-indigo-400;
+	}
+
+	.btn-secondary {
+		@apply border;
+		border-color: var(--input-border);
+		background-color: var(--badge-bg);
+		color: var(--text);
+		&:hover {
+			background-color: var(--surface-hover);
+		}
+	}
+
+	.btn-ghost {
+		color: var(--text);
+		&:hover {
+			background-color: var(--surface-hover);
+		}
+	}
+
+	.badge {
+		@apply inline-flex items-center rounded-full border px-2 py-0.5 text-xs;
+		border-color: var(--input-border);
+		background-color: var(--badge-bg);
+		color: var(--badge-text);
+	}
+
+	.error-box {
+		@apply rounded-xl border p-3 text-sm;
+		border-color: var(--error-border);
+		background-color: var(--error-bg);
+		color: var(--error-text);
+	}
+
+	.topbar {
+		@apply border-b;
+		border-color: var(--border);
+		background-color: var(--topbar-bg);
+	}
+}

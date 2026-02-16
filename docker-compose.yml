@@ -1,0 +1,102 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: taskmgr-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init-multiple-dbs.sql:/docker-entrypoint-initdb.d/init-multiple-dbs.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d postgres"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 5s
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: 8081
+      JWT_SECRET: ${JWT_SECRET:-dev_super_secret_change_me}
+      ROOT_ADMIN_KEY: ${ROOT_ADMIN_KEY:-}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${AUTH_DB:-auth_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  project-service:
+    build:
+      context: ./services/project-service
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: 8082
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${PROJECT_DB:-project_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  notification-service:
+    build:
+      context: ./services/notification-service
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: 8083
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${NOTIF_DB:-notif_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  task-service:
+    build:
+      context: ./services/task-service
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: 8084
+      NOTIFICATION_SERVICE_URL: http://notification-service:8083
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${TASK_DB:-task_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      notification-service:
+        condition: service_started
+
+  gateway:
+    build:
+      context: ./gateway
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: 8080
+      JWT_SECRET: ${JWT_SECRET:-dev_super_secret_change_me}
+      AUTH_SERVICE_URL: http://auth-service:8081
+      PROJECT_SERVICE_URL: http://project-service:8082
+      TASK_SERVICE_URL: http://task-service:8084
+      NOTIFICATION_SERVICE_URL: http://notification-service:8083
+    ports:
+      - "${GATEWAY_PORT:-8090}:8080"
+    depends_on:
+      auth-service:
+        condition: service_started
+      project-service:
+        condition: service_started
+      task-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+
+volumes:
+  pgdata:

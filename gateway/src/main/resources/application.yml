@@ -1,0 +1,53 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:dev_super_secret_change_me}
+
+spring:
+  main:
+    web-application-type: reactive
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOriginPatterns:
+              - "http://localhost:*"
+              - "http://127.0.0.1:*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+      routes:
+        - id: auth
+          uri: ${AUTH_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/auth/**
+        - id: orgs_projects
+          uri: ${PROJECT_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/orgs/**,/projects/*
+        - id: tasks
+          uri: ${TASK_SERVICE_URL:http://localhost:8084}
+          predicates:
+            - Path=/tasks,/tasks/**,/projects/*/tasks,/projects/*/tasks/**
+        - id: notifications
+          uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/notifications/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
