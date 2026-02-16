@@ -193,7 +193,7 @@ export default function DashboardPage() {
               <div className="badge">Workspace</div>
               {isRoot ? <div className="badge border-indigo-500/30 bg-indigo-500/10 text-indigo-200">Root Admin Mode</div> : null}
             </div>
-            <h1 className="mt-3 text-2xl font-semibold tracking-tight">Student Progress</h1>
+            <h1 className="mt-3 text-2xl font-semibold tracking-tight">{isRoot ? 'Student Progress' : 'Dashboard'}</h1>
             <p className="mt-1 text-sm text-slate-400">Create teams, then add projects under them.</p>
 
             {isRoot ? (
