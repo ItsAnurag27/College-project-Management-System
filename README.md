@@ -1,5 +1,7 @@
 # Unitify (MVP)
 
+![Preview Image](https://github.com/ItsAnurag27/College-project-Management-System/demo.png)
+
 This repo scaffolds a **Spring Boot microservices** MVP with:
 
 - API Gateway (Spring Cloud Gateway)
