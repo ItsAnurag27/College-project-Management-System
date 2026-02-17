@@ -1,6 +1,6 @@
 # Unitify (MVP)
 
-![Preview Image](https://github.com/ItsAnurag27/College-project-Management-System/demo)
+![Preview Image](./demo/)
 
 This repo scaffolds a **Spring Boot microservices** MVP with:
 
