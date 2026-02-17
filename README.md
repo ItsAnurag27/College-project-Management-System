@@ -1,6 +1,6 @@
 # Unitify (MVP)
 
-![Preview Image](./demo.png/)
+![Preview Image](./demo.mp4/)
 
 This repo scaffolds a **Spring Boot microservices** MVP with:
 
