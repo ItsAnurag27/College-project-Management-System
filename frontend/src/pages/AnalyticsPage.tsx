@@ -6,7 +6,7 @@ import { getUser } from '../auth'
 
 type Org = { id: string; name: string }
 type Member = { orgId: string; userId: string; role: string }
-type Project = { id: string; orgId: string; name: string; description?: string | null }
+type Project = { id: string; orgId: string; name: string; description?: string | null; repoUrl?: string | null }
 type Task = { id: string; projectId: string; title: string; status: 'TODO' | 'IN_PROGRESS' | 'DONE'; deadline?: string | null }
 
 type ChartPoint = { label: string; value: number }

@@ -55,7 +55,7 @@ public class AuthController {
 
   public record AuthResponse(String accessToken, UserView user) {}
 
-  public record UserView(String id, String name, String email, boolean rootAdmin) {}
+  public record UserView(String id, String name, String email, boolean rootAdmin, boolean emailVerified) {}
 
   @PostMapping("/register")
   @ResponseStatus(HttpStatus.CREATED)
@@ -79,11 +79,22 @@ public class AuthController {
 
     UUID id = UUID.randomUUID();
     String hash = passwordEncoder.encode(request.password());
-    UserEntity user = new UserEntity(id, request.name(), request.email().toLowerCase(), hash, OffsetDateTime.now(), isRoot);
+    UserEntity user = new UserEntity(
+      id,
+      request.name(),
+      request.email().toLowerCase(),
+      hash,
+      OffsetDateTime.now(),
+      isRoot,
+      false
+    );
     users.save(user);
 
     String token = jwtService.issueToken(user.getId(), user.getEmail(), user.getName(), user.isRootAdmin());
-    return new AuthResponse(token, new UserView(user.getId().toString(), user.getName(), user.getEmail(), user.isRootAdmin()));
+    return new AuthResponse(
+      token,
+      new UserView(user.getId().toString(), user.getName(), user.getEmail(), user.isRootAdmin(), user.isEmailVerified())
+    );
   }
 
   @PostMapping("/login")
@@ -96,7 +107,10 @@ public class AuthController {
     }
 
     String token = jwtService.issueToken(user.getId(), user.getEmail(), user.getName(), user.isRootAdmin());
-    return new AuthResponse(token, new UserView(user.getId().toString(), user.getName(), user.getEmail(), user.isRootAdmin()));
+    return new AuthResponse(
+      token,
+      new UserView(user.getId().toString(), user.getName(), user.getEmail(), user.isRootAdmin(), user.isEmailVerified())
+    );
   }
 
   @GetMapping("/me")
@@ -108,7 +122,7 @@ public class AuthController {
     UserEntity user = users.findById(UUID.fromString(userId))
         .orElseThrow(() -> new WebException(HttpStatus.NOT_FOUND, "User not found"));
 
-    return new UserView(user.getId().toString(), user.getName(), user.getEmail(), user.isRootAdmin());
+    return new UserView(user.getId().toString(), user.getName(), user.getEmail(), user.isRootAdmin(), user.isEmailVerified());
   }
 
   @GetMapping("/users/lookup")
@@ -123,7 +137,7 @@ public class AuthController {
     UserEntity user = users.findByEmailIgnoreCase(email)
         .orElseThrow(() -> new WebException(HttpStatus.NOT_FOUND, "User not found"));
 
-    return new UserView(user.getId().toString(), user.getName(), user.getEmail(), user.isRootAdmin());
+    return new UserView(user.getId().toString(), user.getName(), user.getEmail(), user.isRootAdmin(), user.isEmailVerified());
   }
 
   @GetMapping("/users/{userId}")
@@ -138,6 +152,6 @@ public class AuthController {
     UserEntity user = users.findById(UUID.fromString(userId))
         .orElseThrow(() -> new WebException(HttpStatus.NOT_FOUND, "User not found"));
 
-    return new UserView(user.getId().toString(), user.getName(), user.getEmail(), user.isRootAdmin());
+    return new UserView(user.getId().toString(), user.getName(), user.getEmail(), user.isRootAdmin(), user.isEmailVerified());
   }
 }

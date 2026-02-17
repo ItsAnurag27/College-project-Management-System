@@ -30,15 +30,27 @@ public class UserEntity {
   @Column(name = "root_admin", nullable = false)
   private boolean rootAdmin;
 
+  @Column(name = "email_verified", nullable = false)
+  private boolean emailVerified;
+
   protected UserEntity() {}
 
-  public UserEntity(UUID id, String name, String email, String passwordHash, OffsetDateTime createdAt, boolean rootAdmin) {
+  public UserEntity(
+      UUID id,
+      String name,
+      String email,
+      String passwordHash,
+      OffsetDateTime createdAt,
+      boolean rootAdmin,
+      boolean emailVerified
+  ) {
     this.id = id;
     this.name = name;
     this.email = email;
     this.passwordHash = passwordHash;
     this.createdAt = createdAt;
     this.rootAdmin = rootAdmin;
+    this.emailVerified = emailVerified;
   }
 
   public UUID getId() {
@@ -57,11 +69,23 @@ public class UserEntity {
     return passwordHash;
   }
 
+  public void setPasswordHash(String passwordHash) {
+    this.passwordHash = passwordHash;
+  }
+
   public OffsetDateTime getCreatedAt() {
     return createdAt;
   }
 
   public boolean isRootAdmin() {
     return rootAdmin;
+  }
+
+  public boolean isEmailVerified() {
+    return emailVerified;
+  }
+
+  public void setEmailVerified(boolean emailVerified) {
+    this.emailVerified = emailVerified;
   }
 }

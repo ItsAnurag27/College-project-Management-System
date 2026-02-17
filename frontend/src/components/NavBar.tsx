@@ -1,58 +1,22 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { clearSession, getUser } from '../auth'
-import { ThemeMode, toggleTheme } from '../theme'
 import { getProfilePhoto } from '../profilePhoto'
-
-function SunIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path
-        d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z"
-        stroke="currentColor"
-        strokeWidth="2"
-      />
-      <path
-        d="M12 2v2M12 20v2M4 12H2M22 12h-2M5.64 5.64 4.22 4.22M19.78 19.78l-1.42-1.42M18.36 5.64l1.42-1.42M4.22 19.78l1.42-1.42"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
-
-function MoonIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path
-        d="M21 14.5A8.5 8.5 0 0 1 9.5 3a7 7 0 1 0 11.5 11.5Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
 
 export default function NavBar() {
   const nav = useNavigate()
   const user = getUser()
   const [showPostLoginSplash, setShowPostLoginSplash] = useState(false)
   const [photo, setPhoto] = useState<string | null>(() => (user?.id ? getProfilePhoto(user.id) : null))
-  const [mode, setMode] = useState<ThemeMode>(() => {
-    const raw = document.documentElement.dataset.theme
-    return raw === 'light' ? 'light' : 'dark'
-  })
 
   useEffect(() => {
     if (!user?.id) return
     const onUpdate = () => setPhoto(getProfilePhoto(user.id))
-    window.addEventListener('profilePhotoUpdated', onUpdate)
-    window.addEventListener('storage', onUpdate)
+    globalThis.addEventListener('profilePhotoUpdated', onUpdate)
+    globalThis.addEventListener('storage', onUpdate)
     return () => {
-      window.removeEventListener('profilePhotoUpdated', onUpdate)
-      window.removeEventListener('storage', onUpdate)
+      globalThis.removeEventListener('profilePhotoUpdated', onUpdate)
+      globalThis.removeEventListener('storage', onUpdate)
     }
   }, [user?.id])
 
@@ -73,7 +37,7 @@ export default function NavBar() {
       }
 
       setShowPostLoginSplash(true)
-      const t = window.setTimeout(() => {
+      const t = globalThis.setTimeout(() => {
         setShowPostLoginSplash(false)
         try {
           sessionStorage.removeItem('postLoginSplashUntil')
@@ -83,11 +47,11 @@ export default function NavBar() {
       }, remaining)
 
       // Failsafe: never allow it to get stuck.
-      const t2 = window.setTimeout(() => setShowPostLoginSplash(false), Math.max(remaining + 250, 1200))
+      const t2 = globalThis.setTimeout(() => setShowPostLoginSplash(false), Math.max(remaining + 250, 1200))
 
       return () => {
-        window.clearTimeout(t)
-        window.clearTimeout(t2)
+        globalThis.clearTimeout(t)
+        globalThis.clearTimeout(t2)
       }
     } catch {
       return
@@ -122,17 +86,6 @@ export default function NavBar() {
           </div>
 
           <div className="flex flex-wrap items-center justify-end gap-2 text-sm">
-            <button
-              className="btn btn-secondary px-2"
-              onClick={() => {
-                const next = toggleTheme()
-                setMode(next)
-              }}
-              aria-label="Toggle dark/light mode"
-              title="Toggle dark/light mode"
-            >
-              {mode === 'dark' ? <MoonIcon /> : <SunIcon />}
-            </button>
             <Link to="/notifications" className="btn btn-ghost px-2 py-2 sm:px-3">
               Notifications
             </Link>

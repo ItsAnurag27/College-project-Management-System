@@ -6,8 +6,6 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-    ports:
-      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db/init-multiple-dbs.sql:/docker-entrypoint-initdb.d/init-multiple-dbs.sql:ro
@@ -19,18 +17,12 @@ services:
       start_period: 5s
 
   auth-service:
-    build:
-      context: ./services/auth-service
+    image: ${IMAGE_PREFIX:-ghcr.io/owner/repo}/auth-service:${IMAGE_TAG:-latest}
     restart: unless-stopped
     environment:
       SERVER_PORT: 8081
       JWT_SECRET: ${JWT_SECRET:-dev_super_secret_change_me}
       ROOT_ADMIN_KEY: ${ROOT_ADMIN_KEY:-}
-      MAIL_HOST: ${MAIL_HOST:-}
-      MAIL_PORT: ${MAIL_PORT:-587}
-      MAIL_USERNAME: ${MAIL_USERNAME:-}
-      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
-      MAIL_FROM: ${MAIL_FROM:-no-reply@unitify.local}
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${AUTH_DB:-auth_db}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
@@ -39,8 +31,7 @@ services:
         condition: service_healthy
 
   project-service:
-    build:
-      context: ./services/project-service
+    image: ${IMAGE_PREFIX:-ghcr.io/owner/repo}/project-service:${IMAGE_TAG:-latest}
     restart: unless-stopped
     environment:
       SERVER_PORT: 8082
@@ -52,8 +43,7 @@ services:
         condition: service_healthy
 
   notification-service:
-    build:
-      context: ./services/notification-service
+    image: ${IMAGE_PREFIX:-ghcr.io/owner/repo}/notification-service:${IMAGE_TAG:-latest}
     restart: unless-stopped
     environment:
       SERVER_PORT: 8083
@@ -65,8 +55,7 @@ services:
         condition: service_healthy
 
   task-service:
-    build:
-      context: ./services/task-service
+    image: ${IMAGE_PREFIX:-ghcr.io/owner/repo}/task-service:${IMAGE_TAG:-latest}
     restart: unless-stopped
     environment:
       SERVER_PORT: 8084
@@ -81,8 +70,7 @@ services:
         condition: service_started
 
   gateway:
-    build:
-      context: ./gateway
+    image: ${IMAGE_PREFIX:-ghcr.io/owner/repo}/gateway:${IMAGE_TAG:-latest}
     restart: unless-stopped
     environment:
       SERVER_PORT: 8080

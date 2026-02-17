@@ -36,7 +36,7 @@ public class JwtUserForwardingFilter implements GlobalFilter, Ordered {
       return chain.filter(exchange);
     }
 
-    if (path.equals("/auth/login") || path.equals("/auth/register")) {
+    if (path.equals("/auth/login") || path.equals("/auth/register") || path.startsWith("/auth/otp/") || path.equals("/auth/password/reset")) {
       return chain.filter(exchange);
     }
 

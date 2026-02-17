@@ -6,6 +6,16 @@ app:
     secret: ${JWT_SECRET:dev_super_secret_change_me}
   rootAdmin:
     key: ${ROOT_ADMIN_KEY:}
+  otp:
+    # 6-digit email OTP
+    ttlMinutes: ${OTP_TTL_MINUTES:10}
+    maxAttempts: ${OTP_MAX_ATTEMPTS:5}
+    rate:
+      perEmailPer10Min: ${OTP_RATE_EMAIL_10MIN:3}
+      perEmailPerDay: ${OTP_RATE_EMAIL_DAY:10}
+      perIpPer10Min: ${OTP_RATE_IP_10MIN:15}
+  mail:
+    from: ${MAIL_FROM:no-reply@unitify.local}
 
 spring:
   datasource:
@@ -20,3 +30,15 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: true
+
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true

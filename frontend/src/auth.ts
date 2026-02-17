@@ -1,4 +1,4 @@
-export type UserView = { id: string; name: string; email: string; rootAdmin?: boolean }
+export type UserView = { id: string; name: string; email: string; rootAdmin?: boolean; emailVerified?: boolean }
 
 export function setSession(accessToken: string, user: UserView) {
   localStorage.setItem('accessToken', accessToken)

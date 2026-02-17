@@ -5,10 +5,17 @@ import { apiFetch } from '../api'
 import { getUser } from '../auth'
 
 type Org = { id: string; name: string }
-type Project = { id: string; orgId: string; name: string; description?: string | null }
+type Project = { id: string; orgId: string; name: string; description?: string | null; repoUrl?: string | null }
 type Member = { orgId: string; userId: string; role: string }
 type UserLookup = { id: string; name: string; email: string }
 type Task = { id: string; projectId: string; title: string; status: 'TODO' | 'IN_PROGRESS' | 'DONE' }
+
+function normalizeUrl(raw: string): string {
+  const v = raw.trim()
+  if (!v) return ''
+  if (v.includes('://')) return v
+  return `https://${v}`
+}
 
 function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
@@ -38,6 +45,7 @@ export default function DashboardPage() {
   const [newOrgName, setNewOrgName] = useState('')
   const [newProjectName, setNewProjectName] = useState('')
   const [newProjectDesc, setNewProjectDesc] = useState('')
+  const [newProjectRepoUrl, setNewProjectRepoUrl] = useState('')
 
   const [newMemberUserId, setNewMemberUserId] = useState('')
   const [newMemberRole, setNewMemberRole] = useState<'MEMBER' | 'ADMIN'>('MEMBER')
@@ -424,18 +432,30 @@ export default function DashboardPage() {
                     value={newProjectDesc}
                     onChange={(e) => setNewProjectDesc(e.target.value)}
                   />
+                  <input
+                    className="input"
+                    placeholder="Project link / GitHub repo (optional)"
+                    value={newProjectRepoUrl}
+                    onChange={(e) => setNewProjectRepoUrl(e.target.value)}
+                  />
                   <button
                     className="btn btn-primary w-full"
                     onClick={async () => {
                       setError(null)
                       if (!newProjectName.trim()) return
                       try {
+                        const normalizedRepoUrl = normalizeUrl(newProjectRepoUrl)
                         await apiFetch<Project>(`/orgs/${selectedOrg.id}/projects`, {
                           method: 'POST',
-                          body: JSON.stringify({ name: newProjectName, description: newProjectDesc || null })
+                          body: JSON.stringify({
+                            name: newProjectName,
+                            description: newProjectDesc || null,
+                            repoUrl: normalizedRepoUrl || null
+                          })
                         })
                         setNewProjectName('')
                         setNewProjectDesc('')
+                        setNewProjectRepoUrl('')
                         await refreshProjects(selectedOrg.id)
                       } catch (e: any) {
                         setError(e?.error ?? 'Failed to create project')

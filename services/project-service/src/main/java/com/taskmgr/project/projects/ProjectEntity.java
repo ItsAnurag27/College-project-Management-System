@@ -24,6 +24,9 @@ public class ProjectEntity {
   @Column
   private String description;
 
+  @Column(name = "repo_url")
+  private String repoUrl;
+
   @Column(name = "created_by_user_id", nullable = false, columnDefinition = "uuid")
   private UUID createdByUserId;
 
@@ -32,11 +35,20 @@ public class ProjectEntity {
 
   protected ProjectEntity() {}
 
-  public ProjectEntity(UUID id, UUID orgId, String name, String description, UUID createdByUserId, OffsetDateTime createdAt) {
+  public ProjectEntity(
+      UUID id,
+      UUID orgId,
+      String name,
+      String description,
+      String repoUrl,
+      UUID createdByUserId,
+      OffsetDateTime createdAt
+  ) {
     this.id = id;
     this.orgId = orgId;
     this.name = name;
     this.description = description;
+    this.repoUrl = repoUrl;
     this.createdByUserId = createdByUserId;
     this.createdAt = createdAt;
   }
@@ -55,6 +67,10 @@ public class ProjectEntity {
 
   public String getDescription() {
     return description;
+  }
+
+  public String getRepoUrl() {
+    return repoUrl;
   }
 
   public UUID getCreatedByUserId() {

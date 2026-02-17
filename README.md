@@ -57,3 +57,47 @@ Frontend talks to the gateway at `http://localhost:8090` by default.
 
 - MVP security is enforced at the gateway (JWT validation). Services trust `X-User-Id` forwarded by the gateway.
 - Phase 2 (Kubernetes, RBAC, realtime, kanban/calendar) can be layered on this structure.
+
+## Email OTP (auth-service)
+
+The auth service supports email-based OTP flows with:
+
+- Expiration (default 10 minutes)
+- Attempt limits (default 5 tries per code)
+- Rate limiting (per email and per IP)
+
+Endpoints (through the gateway):
+
+- `POST /auth/otp/request` body: `{ "purpose": "VERIFY_EMAIL" | "LOGIN", "email": "user@site.com" }`
+- `POST /auth/otp/verify` body: `{ "purpose": "VERIFY_EMAIL" | "LOGIN", "email": "user@site.com", "code": "123456" }`
+
+SMTP config:
+
+- Set `MAIL_HOST` (and optionally `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM`) in `.env`.
+- If `MAIL_HOST` is empty, OTP codes are printed in the auth-service logs (dev fallback).
+
+## Deploy to EC2 (GitHub Actions)
+
+This repo includes a GitHub Actions workflow that builds/pushes Docker images to GHCR and then deploys to an EC2 host over SSH.
+
+- Workflow: .github/workflows/deploy-ec2.yml
+- Compose file on server: docker-compose.ec2.yml (pulled into `/opt/unitify` by default)
+
+Required GitHub repo secrets:
+
+- `EC2_HOST`: public IP or DNS of the instance
+- `EC2_USER`: e.g. `ubuntu`
+- `EC2_SSH_KEY`: private key (PEM) for SSH
+
+Optional secrets:
+
+- `EC2_PORT`: SSH port (default `22`)
+- `EC2_APP_DIR`: remote deploy directory (default `/opt/unitify`)
+- `GHCR_USERNAME` / `GHCR_TOKEN`: needed if the EC2 machine must `docker login` to pull from a private GHCR repo
+
+Server prerequisites (EC2):
+
+- Docker + Docker Compose installed
+- Security Group allows inbound `GATEWAY_PORT` (default `8090`)
+
+After the first deploy, edit `/opt/unitify/.env` on the server to set real values (JWT secret, postgres password, etc.).

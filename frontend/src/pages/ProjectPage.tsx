@@ -3,7 +3,14 @@ import { Link, useParams } from 'react-router-dom'
 import NavBar from '../components/NavBar'
 import { apiFetch } from '../api'
 
-type Project = { id: string; orgId: string; name: string; description?: string | null }
+type Project = { id: string; orgId: string; name: string; description?: string | null; repoUrl?: string | null }
+
+function normalizeUrl(raw: string): string {
+  const v = raw.trim()
+  if (!v) return ''
+  if (v.includes('://')) return v
+  return `https://${v}`
+}
 
 type OrgMember = { orgId: string; userId: string; role: string }
 type UserView = { id: string; name: string; email: string }
@@ -295,6 +302,16 @@ export default function ProjectPage() {
             </div>
             <h1 className="mt-3 text-2xl font-semibold tracking-tight">{project?.name ?? 'Loading…'}</h1>
             {project?.description ? <p className="mt-1 text-sm text-slate-400">{project.description}</p> : <p className="mt-1 text-sm text-slate-500">No description</p>}
+            {project?.repoUrl ? (
+              <a
+                className="mt-2 inline-block text-sm text-slate-300 underline decoration-slate-600 underline-offset-4 hover:text-slate-100"
+                href={normalizeUrl(project.repoUrl)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {project.repoUrl}
+              </a>
+            ) : null}
           </div>
           <div className="hidden sm:flex sm:gap-3">
             <div className="card px-4 py-3">

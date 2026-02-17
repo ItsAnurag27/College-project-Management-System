@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import NavBar from '../components/NavBar'
 import { apiFetch } from '../api'
 
-type Project = { id: string; orgId: string; name: string; description?: string | null }
+type Project = { id: string; orgId: string; name: string; description?: string | null; repoUrl?: string | null }
 type Task = { id: string; projectId: string; title: string; description?: string | null; status: 'TODO' | 'IN_PROGRESS' | 'DONE'; deadline?: string | null; assignedToUserId?: string | null }
 
 type ColumnStatus = 'TODO' | 'IN_PROGRESS' | 'DONE'

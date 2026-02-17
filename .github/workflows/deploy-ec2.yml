@@ -1,0 +1,154 @@
+# name: Deploy to EC2
+
+# on:
+#   # push:
+#   #   branches: [main, master]
+#   workflow_dispatch:
+
+# permissions:
+#   contents: read
+#   packages: write
+
+# env:
+#   REGISTRY: ghcr.io
+#   IMAGE_PREFIX: ghcr.io/${{ github.repository }}
+#   IMAGE_TAG: ${{ github.sha }}
+
+# jobs:
+#   build-and-deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
+
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v3
+
+#       - name: Login to GHCR (push)
+#         uses: docker/login-action@v3
+#         with:
+#           registry: ${{ env.REGISTRY }}
+#           username: ${{ github.actor }}
+#           password: ${{ secrets.GITHUB_TOKEN }}
+
+#       - name: Build & push gateway
+#         uses: docker/build-push-action@v6
+#         with:
+#           context: ./gateway
+#           push: true
+#           tags: |
+#             ${{ env.IMAGE_PREFIX }}/gateway:${{ env.IMAGE_TAG }}
+#             ${{ env.IMAGE_PREFIX }}/gateway:latest
+
+#       - name: Build & push auth-service
+#         uses: docker/build-push-action@v6
+#         with:
+#           context: ./services/auth-service
+#           push: true
+#           tags: |
+#             ${{ env.IMAGE_PREFIX }}/auth-service:${{ env.IMAGE_TAG }}
+#             ${{ env.IMAGE_PREFIX }}/auth-service:latest
+
+#       - name: Build & push project-service
+#         uses: docker/build-push-action@v6
+#         with:
+#           context: ./services/project-service
+#           push: true
+#           tags: |
+#             ${{ env.IMAGE_PREFIX }}/project-service:${{ env.IMAGE_TAG }}
+#             ${{ env.IMAGE_PREFIX }}/project-service:latest
+
+#       - name: Build & push notification-service
+#         uses: docker/build-push-action@v6
+#         with:
+#           context: ./services/notification-service
+#           push: true
+#           tags: |
+#             ${{ env.IMAGE_PREFIX }}/notification-service:${{ env.IMAGE_TAG }}
+#             ${{ env.IMAGE_PREFIX }}/notification-service:latest
+
+#       - name: Build & push task-service
+#         uses: docker/build-push-action@v6
+#         with:
+#           context: ./services/task-service
+#           push: true
+#           tags: |
+#             ${{ env.IMAGE_PREFIX }}/task-service:${{ env.IMAGE_TAG }}
+#             ${{ env.IMAGE_PREFIX }}/task-service:latest
+
+#       - name: Prepare SSH
+#         shell: bash
+#         run: |
+#           set -euo pipefail
+#           mkdir -p ~/.ssh
+#           printf '%s' "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+#           chmod 600 ~/.ssh/id_rsa
+#           PORT="${{ secrets.EC2_PORT }}"
+#           if [ -z "$PORT" ]; then PORT=22; fi
+#           ssh-keyscan -p "$PORT" -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+
+#       - name: Upload compose file
+#         shell: bash
+#         run: |
+#           set -euo pipefail
+#           PORT="${{ secrets.EC2_PORT }}"
+#           if [ -z "$PORT" ]; then PORT=22; fi
+#           APP_DIR="${{ secrets.EC2_APP_DIR }}"
+#           if [ -z "$APP_DIR" ]; then APP_DIR=/opt/unitify; fi
+
+#           ssh -p "$PORT" "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" "mkdir -p $APP_DIR"
+#           scp -P "$PORT" ./docker-compose.ec2.yml "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:$APP_DIR/docker-compose.ec2.yml"
+
+#       - name: Deploy on EC2
+#         shell: bash
+#         env:
+#           GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+#           GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+#         run: |
+#           set -euo pipefail
+#           PORT="${{ secrets.EC2_PORT }}"
+#           if [ -z "$PORT" ]; then PORT=22; fi
+#           APP_DIR="${{ secrets.EC2_APP_DIR }}"
+#           if [ -z "$APP_DIR" ]; then APP_DIR=/opt/unitify; fi
+
+#           ssh -p "$PORT" "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" "bash -lc 'set -euo pipefail
+#             cd "$APP_DIR"
+
+#             if [ ! -f .env ]; then
+#               cat > .env <<EOF
+# IMAGE_PREFIX=${{ env.IMAGE_PREFIX }}
+# IMAGE_TAG=${{ env.IMAGE_TAG }}
+
+# # Copy values from .env.example (set real secrets here on the server)
+# JWT_SECRET=change_me
+# ROOT_ADMIN_KEY=
+# GATEWAY_PORT=8090
+# POSTGRES_USER=postgres
+# POSTGRES_PASSWORD=change_me
+# AUTH_DB=auth_db
+# PROJECT_DB=project_db
+# TASK_DB=task_db
+# NOTIF_DB=notif_db
+# EOF
+#             fi
+
+#             if grep -q "^IMAGE_PREFIX=" .env; then
+#               sed -i "s#^IMAGE_PREFIX=.*#IMAGE_PREFIX=${{ env.IMAGE_PREFIX }}#" .env
+#             else
+#               printf "\nIMAGE_PREFIX=${{ env.IMAGE_PREFIX }}\n" >> .env
+#             fi
+
+#             if grep -q "^IMAGE_TAG=" .env; then
+#               sed -i "s#^IMAGE_TAG=.*#IMAGE_TAG=${{ env.IMAGE_TAG }}#" .env
+#             else
+#               printf "\nIMAGE_TAG=${{ env.IMAGE_TAG }}\n" >> .env
+#             fi
+
+#             if [ -n "${GHCR_USERNAME:-}" ] && [ -n "${GHCR_TOKEN:-}" ]; then
+#               echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin
+#             fi
+
+#             docker compose -f docker-compose.ec2.yml pull
+#             docker compose -f docker-compose.ec2.yml up -d
+#           '"

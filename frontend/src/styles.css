@@ -43,33 +43,6 @@
 	--grid-y: 0px;
 }
 
-:root[data-theme='light'] {
-	--bg: #f8fafc;
-	--text: #0f172a;
-	--link: #0f172a;
-	--muted: #475569;
-	--border: rgba(15, 23, 42, 0.12);
-	--surface: rgba(255, 255, 255, 0.8);
-	--surface-strong: rgba(255, 255, 255, 0.9);
-	--surface-hover: rgba(15, 23, 42, 0.06);
-	--badge-bg: rgba(15, 23, 42, 0.06);
-	--badge-text: #0f172a;
-	--input-bg: rgba(255, 255, 255, 0.9);
-	--input-border: rgba(15, 23, 42, 0.14);
-	--placeholder: #64748b;
-	--topbar-bg: rgba(248, 250, 252, 0.8);
-	--error-border: rgba(244, 63, 94, 0.25);
-	--error-bg: rgba(244, 63, 94, 0.08);
-	--error-text: #9f1239;
-
-	/* Dynamic background layers (lighter) */
-	--bg-aurora-1: rgba(99, 102, 241, 0.16);
-	--bg-aurora-2: rgba(56, 189, 248, 0.10);
-	--bg-aurora-3: rgba(255, 255, 255, 0.85);
-	--bg-grid: rgba(15, 23, 42, 0.05);
-	--bg-vignette: rgba(15, 23, 42, 0.10);
-}
-
 @layer base {
 	html,
 	body {
@@ -87,7 +60,7 @@
 		inset: 0;
 		z-index: -2;
 		pointer-events: none;
-		opacity: 0.4;
+		opacity: 1.2;
 		filter: saturate(0.8) contrast(0.95);
 		transform: translate3d(0, 0, 0);
 	}

@@ -40,8 +40,8 @@ public class ProjectController {
   public record OrgCreateRequest(@NotBlank String name) {}
   public record OrgView(String id, String name) {}
 
-  public record ProjectCreateRequest(@NotBlank String name, String description) {}
-  public record ProjectView(String id, String orgId, String name, String description) {}
+  public record ProjectCreateRequest(@NotBlank String name, String description, String repoUrl) {}
+  public record ProjectView(String id, String orgId, String name, String description, String repoUrl) {}
 
   public record AddMemberRequest(@NotNull UUID userId, String role) {}
   public record MemberView(String orgId, String userId, String role) {}
@@ -208,10 +208,16 @@ public class ProjectController {
     }
 
     UUID pid = UUID.randomUUID();
-    ProjectEntity project = new ProjectEntity(pid, oid, request.name(), request.description(), uid, OffsetDateTime.now());
+    ProjectEntity project = new ProjectEntity(pid, oid, request.name(), request.description(), request.repoUrl(), uid, OffsetDateTime.now());
     projects.save(project);
 
-    return new ProjectView(project.getId().toString(), project.getOrgId().toString(), project.getName(), project.getDescription());
+    return new ProjectView(
+      project.getId().toString(),
+      project.getOrgId().toString(),
+      project.getName(),
+      project.getDescription(),
+      project.getRepoUrl()
+    );
   }
 
   @GetMapping("/orgs/{orgId}/projects")
@@ -229,7 +235,7 @@ public class ProjectController {
 
     return projects.findByOrgId(oid)
         .stream()
-        .map(p -> new ProjectView(p.getId().toString(), p.getOrgId().toString(), p.getName(), p.getDescription()))
+      .map(p -> new ProjectView(p.getId().toString(), p.getOrgId().toString(), p.getName(), p.getDescription(), p.getRepoUrl()))
         .toList();
   }
 
@@ -247,7 +253,13 @@ public class ProjectController {
       throw new WebException(HttpStatus.FORBIDDEN, "Not a member of org");
     }
 
-    return new ProjectView(project.getId().toString(), project.getOrgId().toString(), project.getName(), project.getDescription());
+    return new ProjectView(
+      project.getId().toString(),
+      project.getOrgId().toString(),
+      project.getName(),
+      project.getDescription(),
+      project.getRepoUrl()
+    );
   }
 
   @DeleteMapping("/projects/{projectId}")
