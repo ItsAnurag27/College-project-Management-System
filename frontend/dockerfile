@@ -1,0 +1,29 @@
+# Step 1: Build the application
+FROM node:18 AS builder
+
+WORKDIR /app
+
+# copy package files
+COPY package*.json ./
+
+# install dependencies
+RUN npm install
+
+# copy source code
+COPY . .
+
+# build the app
+RUN npm run build
+
+
+# Step 2: Serve using nginx
+FROM nginx:alpine
+
+# copy build files
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# expose port
+EXPOSE 80
+
+# start nginx
+CMD ["nginx", "-g", "daemon off;"]
